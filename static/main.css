@@ -1,0 +1,96 @@
+* {
+    box-sizing: border-box;
+    font-family: Helvetica, sans-serif;
+    /* border: thin red solid; */
+}
+
+
+body {
+    
+    background-color: rgb(234, 234, 234);
+
+}
+
+h1 {
+    color: rgb(168, 16, 210);
+}
+
+div {display: flex;}
+
+.horizontal-div {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+}
+
+.vertical-div {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+
+#navigationBar {
+    height: 100px;
+    background-color: rgb(60, 126, 249);
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+
+}
+
+#navigationBar ul {
+    display: flex;
+    list-style-type: none;
+    flex-direction: row;
+    justify-content: space-around;
+    padding-inline-start: 0;
+}
+
+#navigationBar ul li a{
+    color: white;
+    font-size: 20px;
+    padding: 20px;
+    text-decoration: none;
+
+}
+
+#navigationBar ul li a:hover{
+    color: white;
+    font-size: 20px;
+    padding: 20px;
+    text-decoration: none;
+    background-color: rgb(54, 54, 188);
+    border-radius: 30px;
+    transform: rotate(15deg);
+    color: rgb(168, 16, 210);
+
+}
+
+#welcome-message {
+    margin: 50px;
+    padding: 10px 50px 50px 50px;
+    background-color: rgb(255, 255, 255);
+}
+
+
+#account-container {
+    width: 350px;
+    background-color: rgba(168, 16, 210, 0.413);
+    border-radius: 40px 0px;
+    padding: 40px;
+    color: rgb(94, 94, 94);
+    margin: 100px;
+}
+
+#make-account-form {
+    padding: 50px;
+    background-color: rgb(255, 255, 255);
+}
+
+#open-account-content {
+    width: 500px;
+    padding: 50px;
+}

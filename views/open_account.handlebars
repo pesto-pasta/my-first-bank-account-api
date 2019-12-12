@@ -1,0 +1,21 @@
+<div class="vertical-div">
+    <div class="vertical-div" id="open-account-content">
+        <div class="vertical-div">
+            <h1>Choose your balance.</h1>
+        </div>
+        <div>
+            {{#if errorMessage}}
+            {{errorMessage}}
+            {{/if}}
+        </div>
+
+        <form action="/open_account" method="POST" id="make-account-form">
+            <input type="text" name="first" placeholder="First Name" />
+            <input type="text" name="last" placeholder="Last Name" />
+            <input type="number" name="balance" placeholder="Opening Balance" />
+            <input type="text" name="address" placeholder="Address" />
+            <input type="text" name="ssn" placeholder="SSN" />
+            <input type="submit" value="Open Account" />
+        </form>
+    </div>
+</div>
