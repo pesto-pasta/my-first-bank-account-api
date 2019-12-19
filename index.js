@@ -1,7 +1,11 @@
 const express = require('express');
 const session = require('express-session');
 const handleBars = require('express-handlebars');
+const DBQuery = require('./DBQuery.js');
 const app = express();
+
+
+
 
 
 //listen on 3000
@@ -38,38 +42,38 @@ app.use(session({ secret: "87654dddkl", resave: true, saveUninitialized: true })
 
 
 //global variables and functions area
-const users = [
-    {
-        cash: 0.00,
-        firstName: "Tyler",
-        lastName: "Sayvetz",
-        address: "1015 west nickerson",
-        ssn: 098765456,
-        interestRate: 0.004,
-    },
-    {
-        cash: 0.00,
-        firstName: "Jordan",
-        lastName: "Soltman",
-        adress: "vashon island",
-        ssn: 234567733,
-        interestRate: 0.004,
-    }
-];
 
-let accountNumberCounter = 34830339467;
-function createUser(parentListArray, first, last, ssn, balance, address) {
-   const newUser = {
-        accountNumber: accountNumberCounter,
-        cash: balance,
-        firstName: first,
-        lastName: last,
-        address: address,
-        ssn: ssn,
-        interestRate: 0.004,
+// function createUser(parentListArray, first, last, password, balance, address, ) {
+//     const newUser = {
+//         accountNumber: accountNumberCounter,
+//         cash: balance,
+//         firstName: first,
+//         lastName: last,
+//         password: password,
+//         address: address,
+//         interestRate: 0.004,
+//     }
+//     return newUser;
+// };
+
+function verifyDigitsLessThan(target, number) {
+    let count = 1;
+    while (number > 10) {
+        number /= 10;
+        count++
     }
-    return newUser;
-};
+    return count <= target;
+}
+
+function authorize(req, res, next) {
+    if (!req.session.user) {
+        res.redirect('/login?error=notauthorized');
+        return;
+    }
+    next();
+
+}   
+
 
 //routes
 app.get('/', (req, res) => {
@@ -115,7 +119,7 @@ app.get('/open_account', (req, res) => {
     let errorMessage = "";
     if (req.query.error) {
         if (req.query.error == "invalidInfo") {
-            errorMessage = "Please fill in the required fields prior to opening a coconut";
+            errorMessage = "Some or all of the required fields were improperly filled in";
         }
     }
     res.render("open_account.handlebars", {
@@ -124,22 +128,95 @@ app.get('/open_account', (req, res) => {
 });
 
 app.post('/open_account', (req, res) => {
-    //do some shit with dat info yo
-    if (!(req.body.first && req.body.last && req.body.ssn && req.body.address && req.body.balance)) {
+
+    //reject unclean incoming data
+    let clean = true;
+        clean = (
+            req.body.first.length !== 0 && 
+            req.body.last.length !== 0 && 
+            req.body.password.length !== 0 && 
+            req.body.address.length !== 0 && 
+            req.body.balance !== 0 &&
+            req.body.first.length <= 20 && 
+            req.body.last.length <= 20 && 
+            req.body.password.length <= 20 && 
+            req.body.address.length <= 50 &&
+            verifyDigitsLessThan(11, req.body.balance)
+        );
+
+    if (!clean) {
         res.redirect('/open_account?error=invalidInfo');
         return;
     }
-    
-    users.push(createUser(users, req.body.first, req.body.last, req.body.snn, req.body.balance, req.body.address));
-    const activeUser = users.find((user) => user.accountNumber === accountNumberCounter);
-    accountNumberCounter++;
-    res.render('account.handlebars', {
-        user: activeUser,
-    })
 
+    //make sure user doesnt already exist and then write to database
+    DBQuery.searchForUser(req.body.first, req.body.last)
+        .then((result) => {
+            if (result !== null) {
+                console.log("Found results!: ", result)
+                return DBQuery.newUser(req.body.first, req.body.last, req.body.password, req.body.balance, req.body.address);
+            }
+        })
+        .then((result) => {
+            console.log(result, "User written to database...");
+            req.session.user = result;
+        })
+         //do some shit with results
+        .catch((reject) => {
+            console.log("Error at index 158.", reject);
+        })
+
+
+        res.redirect('/login');
+        return;
 });
 
+
+app.get('/login', (req, res) => {
+   
+    if (req.session.user) {
+        res.redirect('/account');
+        return;
+    }
+
+    let errorMessage = "";
+    if (req.query.error) {
+        errorMessage = "Sorry, Bad Login Credentials";
+    }
+
+    res.render("login.handlebars", {
+        errorMessage: errorMessage
+    });
+});
+
+app.post('/login', (req, res) => {
+
+    //check credentials
+    DBQuery.getUser(req.body.last, req.body.password)
+        .then((result) => {
+
+            //direct to account if credentials match up. Assign to req.session. 
+            const currentUser = 
+
+            req.session.user = result[0];
+            console.log("user assigned to session. Logged in successfully.");
+            res.redirect('/account');
+            return;
+        })
+        .catch((reject) => {
+
+            //direct to login with query error. Credentails bad.
+            console.log("user login attempt failed. Check DB messages for exact cause..");
+            res.redirect('/login?error=credentials');
+            return;
+        })
+})
 
 app.get('/account', (req, res) => {
-    res.render("account.handlebars");
-});
+    app.render("account.handlebars", {
+        user: req.session.user,
+    });
+})
+
+
+

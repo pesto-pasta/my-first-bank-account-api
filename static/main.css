@@ -77,11 +77,11 @@ div {display: flex;}
 
 
 #account-container {
-    width: 350px;
-    background-color: rgba(168, 16, 210, 0.413);
+    width: 600px;
+    background-color: rgba(168, 16, 210, 0.589);
     border-radius: 40px 0px;
     padding: 40px;
-    color: rgb(94, 94, 94);
+    color: rgb(224, 224, 224);
     margin: 100px;
 }
 
@@ -91,6 +91,6 @@ div {display: flex;}
 }
 
 #open-account-content {
-    width: 500px;
+    width: 600px;
     padding: 50px;
 }

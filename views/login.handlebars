@@ -1,0 +1,16 @@
+<div class="vertical-div">
+    <div class="vertical-div" id="open-account-content">
+        <div class="vertical-div">
+            <h1>Welcome back.</h1>
+        </div>
+        <div>
+            {{errorMessage}}
+        </div>
+
+        <form action="/login" method="POST" id="make-account-form">
+            <input type="text" name="last" maxlength="20" placeholder="Last Name" />
+            <input type="password" name="password" maxlength="20" placeholder="Password"/>
+            <input type="submit" value='"Secure" login' />
+        </form>
+    </div>
+</div>
