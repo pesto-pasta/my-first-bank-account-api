@@ -74,10 +74,21 @@ function authorize(req, res, next) {
 
 }   
 
+function passAccountLinkText (user) {
+    return (user) ? 
+    { accountLink:  '<li><a href="/account">MyAccount</a></li> <li><a href="/logout">Log Out</a></li>'} :
+    { accountLink: '<li><a href="/login">Log In</a></li>'};
+}
+
 
 //routes
 app.get('/', (req, res) => {
-    res.render("index.handlebars");
+    
+    let logoutMessage = req.query.logout ? "Come again soon." : undefined;
+    res.render("index.handlebars", {
+        accountLinks: passAccountLinkText(req.session.user),
+        message: logoutMessage,
+    });
 });
 
 app.get('/userInfo', (req, res) => {
@@ -124,6 +135,7 @@ app.get('/open_account', (req, res) => {
     }
     res.render("open_account.handlebars", {
         errorMessage: errorMessage,
+        accountLinks: passAccountLinkText(req.session.user)
     });
 });
 
@@ -212,11 +224,14 @@ app.post('/login', (req, res) => {
         })
 })
 
-app.get('/account', (req, res) => {
-    app.render("account.handlebars", {
+app.get('/account', authorize, (req, res) => {
+    res.render("account.handlebars", {
         user: req.session.user,
+        accountLinks: passAccountLinkText(req.session.user)
     });
 })
 
-
-
+app.get('/logout', (req, res) => {
+    delete req.session.user;
+    res.redirect('/?logout=y');
+})
