@@ -4,7 +4,8 @@ const connection = mysql.createConnection({
 	host: 'localhost',
 	user: 'root',
 	password: 'roadrat',
-	database: 'store'
+	database: 'store',
+	insecureAuth: true,
 });
 
 connection.connect();
