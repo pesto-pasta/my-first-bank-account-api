@@ -1,17 +1,34 @@
 <div class="vertical-div">
-    
+
+    <div id="account-toolbar">
+        <div class="account-widget">
+            <p id="account-welcome-p">Account settings</p>
+            <ul>
+                <li><a href="/account/changepass">Change Password</a></li>
+                <li><a href="/account/address">Update Address</a></li>
+                <li><a href="/account/billing">Update Billing Info</a></li>
+                <li><a href="/account/helpnot">Help and Support</a></li>
+                <li><a href="/account/complaint">File Complaint</a></li>
+            </ul>
+        </div>
+        <div class="account-widget">
+            <p id="account-welcome-p">Financial settings</p>
+            <ul>
+                <li><a href="/account/home">Change Balance</a></li>
+                <li><a href="/account/home">Send Funds</a></li>
+                <li><a href="/account/home">Request Funds</a></li>
+                <li><a href="/account/home">Break Economy</a></li>
+
+            </ul>
+        </div>
+    </div>
     <div id="account-container">
-        {{user.first}}, you made it to your account.<br><br>
-        Your account number is: {{user.account}}<br>
-        Your balance is: {{user.balance}}<br>
-        Your address is: {{user.address}}<br>
-        Your spleen is mushy.<br>
-        Your dog pooped on my lawn.<br>
-        Your drink is getting warm.<br>
-
-    </div>
-
-    <div>
-        
-    </div>
+        <h3>{{message}}</h3>
+        {{>sub_page}}
+        </div>
 </div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.0/axios.min.js"></script>
+<script>
+
+
+</script>

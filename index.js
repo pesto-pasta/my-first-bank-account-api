@@ -1,16 +1,13 @@
 const express = require('express');
+const fs = require('fs');
 const session = require('express-session');
 const handleBars = require('express-handlebars');
+const Handlebars = require('handlebars');
 const DBQuery = require('./DBQuery.js');
 const app = express();
 
-
-
-
-
 //listen on 3000
 app.listen(3000, () => console.log("Listening on port 3000..."));
-
 
 //define customHandlebars
 const customHandlebars = handleBars.create({
@@ -41,20 +38,18 @@ app.use(express.urlencoded({ extended: true }));
 app.use(session({ secret: "87654dddkl", resave: true, saveUninitialized: true }));
 
 
-//global variables and functions area
-
-// function createUser(parentListArray, first, last, password, balance, address, ) {
-//     const newUser = {
-//         accountNumber: accountNumberCounter,
-//         cash: balance,
-//         firstName: first,
-//         lastName: last,
-//         password: password,
-//         address: address,
-//         interestRate: 0.004,
-//     }
-//     return newUser;
-// };
+//anonymous functions area
+function registerPartial(name) {
+    let file = __dirname + "/views/subviews/" + name + ".handlebars";
+    fs.readFile(file, 'utf-8', (error, result) => {
+        if (error) {
+            console.log(error);
+        } else {
+            console.log(result);
+            Handlebars.registerPartial('sub_page', result);
+        }
+    })
+}
 
 function verifyDigitsLessThan(target, number) {
     let count = 1;
@@ -72,18 +67,18 @@ function authorize(req, res, next) {
     }
     next();
 
-}   
+}
 
-function passAccountLinkText (user) {
-    return (user) ? 
-    { accountLink:  '<li><a href="/account">MyAccount</a></li> <li><a href="/logout">Log Out</a></li>'} :
-    { accountLink: '<li><a href="/login">Log In</a></li>'};
+function passAccountLinkText(user) {
+    return (user) ?
+        { accountLink: '<li><a href="/account/home">MyAccount</a></li> <li><a href="/logout">Log Out</a></li>' } :
+        { accountLink: '<li><a href="/login">Log In</a></li>' };
 }
 
 
-//routes
+//ROUTES
 app.get('/', (req, res) => {
-    
+
     let logoutMessage = req.query.logout ? "Come again soon." : undefined;
     res.render("index.handlebars", {
         accountLinks: passAccountLinkText(req.session.user),
@@ -143,18 +138,18 @@ app.post('/open_account', (req, res) => {
 
     //reject unclean incoming data
     let clean = true;
-        clean = (
-            req.body.first.length !== 0 && 
-            req.body.last.length !== 0 && 
-            req.body.password.length !== 0 && 
-            req.body.address.length !== 0 && 
-            req.body.balance !== 0 &&
-            req.body.first.length <= 20 && 
-            req.body.last.length <= 20 && 
-            req.body.password.length <= 20 && 
-            req.body.address.length <= 50 &&
-            verifyDigitsLessThan(11, req.body.balance)
-        );
+    clean = (
+        req.body.first.length !== 0 &&
+        req.body.last.length !== 0 &&
+        req.body.password.length !== 0 &&
+        req.body.address.length !== 0 &&
+        req.body.balance !== 0 &&
+        req.body.first.length <= 20 &&
+        req.body.last.length <= 20 &&
+        req.body.password.length <= 20 &&
+        req.body.address.length <= 50 &&
+        verifyDigitsLessThan(11, req.body.balance)
+    );
 
     if (!clean) {
         res.redirect('/open_account?error=invalidInfo');
@@ -173,19 +168,18 @@ app.post('/open_account', (req, res) => {
             console.log(result, "User written to database...");
             req.session.user = result;
         })
-         //do some shit with results
+        //do some shit with results
         .catch((reject) => {
             console.log("Error at index 158.", reject);
         })
 
 
-        res.redirect('/login');
-        return;
+    res.redirect('/login');
+    return;
 });
 
-
 app.get('/login', (req, res) => {
-   
+
     if (req.session.user) {
         res.redirect('/account');
         return;
@@ -208,11 +202,9 @@ app.post('/login', (req, res) => {
         .then((result) => {
 
             //direct to account if credentials match up. Assign to req.session. 
-            const currentUser = 
-
-            req.session.user = result[0];
+            const currentUser = req.session.user = result[0];
             console.log("user assigned to session. Logged in successfully.");
-            res.redirect('/account');
+            res.redirect('/account/home');
             return;
         })
         .catch((reject) => {
@@ -224,14 +216,55 @@ app.post('/login', (req, res) => {
         })
 })
 
-app.get('/account', authorize, (req, res) => {
+app.get('/account/:page', authorize, (req, res) => {
+    registerPartial(req.params.page);
+
+    let message = undefined;
+    if (req.query.message === "passchanged") {
+        message = "Your password was successfully changed"
+    }
+
+
     res.render("account.handlebars", {
         user: req.session.user,
-        accountLinks: passAccountLinkText(req.session.user)
+        accountLinks: passAccountLinkText(req.session.user),
+        message: message,
     });
 })
 
 app.get('/logout', (req, res) => {
     delete req.session.user;
     res.redirect('/?logout=y');
+})
+
+app.post('/changepass', authorize, (req, res) => {
+        //check that the new passwords match fail? redirect to account/changepass?error="dontmatch"
+
+    //check database that password matches existing password fail? redirect to account/changepass?error="invalidpass"
+    //write the new password to the database
+    //redirect to account/home
+
+    //check validity of the old password
+    DBQuery.checkPass(req.session.user.account, req.body.currentPass)
+
+        //then write the new pass to the db
+        .then((result) => {
+            console.log("Found a user..")
+            return DBQuery.changePass(req.session.user.account, req.body.newPass);
+        })
+
+        .then((result) => {
+            console.log("password change request successfull")
+            return DBQuery.checkPass(req.session.user.account, req.body.newPass);
+        })
+
+        .then((result) => {
+            console.log("Password was successfully changed.");
+            req.session.user.password = result.password;
+            res.redirect('/account/home?message=passchanged')
+        })
+        .catch((reject) => {
+            console.log(reject, "somthing went wrong... ");
+            res.redirect('/account/home');
+        })
 })

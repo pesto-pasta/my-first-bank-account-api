@@ -75,7 +75,36 @@ function getUser(last, password) {
     })
 }
 
+function checkPass(account, password) {
+    return new Promise((resolve, reject) => {
+        connection.query('SELECT * FROM user WHERE account = ? AND password = ?', [account, password], (error, results) => {
+            if (error) {
+                console.log("There was an error looking up the user");
+                reject(error);
+            } else if (results.length === 0) {
+                console.log("FROM DB: didnt find any users with that acct# / password (new password may be bugged)");
+                reject(results);
+            } else {
+                console.log("FROM DB: found exactly one user with those credentials");
+                resolve(results);
+            }
+        })
+    })
+}
+
+function changePass(account, newPass) {
+    return new Promise((resolve, reject) => {
+        connection.query('UPDATE user SET password = ? WHERE account = ?', [newPass, account], (error, results) => {
+            if (error) console.log(error);
+            else resolve(results);
+        })
+    })
+}
+
 
 exports.searchForUser = searchForUser;
 exports.newUser = newUser;
 exports.getUser = getUser;
+exports.checkPass = checkPass;
+exports.changePass  = changePass;
+

@@ -6,8 +6,8 @@
 
 
 body {
-    
-    background-color: rgb(234, 234, 234);
+    background-image: linear-gradient(rgb(238, 238, 238),rgb(234, 234, 234),rgb(146, 146, 146));
+    margin: 0px;
 
 }
 
@@ -15,7 +15,31 @@ h1 {
     color: rgb(168, 16, 210);
 }
 
+h3 {
+    color: rgb(122, 20, 114);
+}
+
+
+
 div {display: flex;}
+
+form {
+    display: flex;
+
+}
+
+form input {
+    background-color: rgb(184, 184, 184);
+    border-radius: 0px;
+    height: 30px;
+    border: none;
+    margin: 5px;
+    color: white;
+    font-weight: 600;
+    font-size: small;
+    text-align: left;
+    
+}
 
 .horizontal-div {
     display: flex;
@@ -32,13 +56,17 @@ div {display: flex;}
 
 
 #navigationBar {
+    position: fixed;
+    top:0px;
+    left: 0px;
+    width: 100%;
     height: 100px;
     background-color: rgb(60, 126, 249);
     display: flex;
     flex-direction: row;
     justify-content: center;
     align-items: center;
-
+    z-index: 1;
 }
 
 #navigationBar ul {
@@ -70,26 +98,63 @@ div {display: flex;}
 }
 
 #welcome-message {
-    margin: 50px;
-    padding: 10px 50px 50px 50px;
-    background-color: rgb(255, 255, 255);
     flex-direction: column;
+    margin: 50px;
+    padding: 50px 50px 50px 50px;
+    background-color: rgb(255, 255, 255);
 }
 
 
 #account-container {
+    flex-direction: column;
     width: 600px;
-    background-color: rgba(168, 16, 210, 0.589);
+    background-color: rgb(255, 255, 255);
     border-radius: 40px 0px;
     padding: 40px;
-    color: rgb(224, 224, 224);
-    margin: 100px;
+    color: rgb(83, 83, 83);
+    margin: 20px;
 }
 
-#make-account-form {
-    padding: 50px;
-    background-color: rgb(255, 255, 255);
+#account-toolbar {
+    flex-direction: column;
+    position: fixed;
+    top: 100px;
+    left: 0px;
+    width: 250px;
+    margin: 20px;
+    padding: 20px;
+    background-color: white;
 }
+
+.account-widget {
+    flex-direction: column;
+}
+.account-widget ul {
+    list-style-type: none;
+    color: rgb(83, 83, 83);
+    padding: 0px;
+}
+
+.account-widget ul li a {
+    color: rgb(83, 83, 83);
+    background-color: white;
+    text-decoration: none;
+    margin: 5px;
+}
+
+.account-widget ul li a:hover {
+    filter: invert(20%);
+    border-radius: 5px;
+}
+
+#account-welcome-p {
+    color:rgb(175, 0, 175);
+    font-weight:600;
+    margin-block-start: 0px;
+    margin-block-end: 0px;
+}
+
+
 
 #open-account-content {
     width: 600px;
