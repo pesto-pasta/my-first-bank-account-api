@@ -45,7 +45,6 @@ function registerPartial(name) {
         if (error) {
             console.log(error);
         } else {
-            console.log(result);
             Handlebars.registerPartial('sub_page', result);
         }
     })
