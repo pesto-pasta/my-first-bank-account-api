@@ -1,5 +1,23 @@
+<h3>{{message}}</h3>
 <p id="account-welcome-p">{{user.first}}, welcome back.</p>
 <br>
-Your account number is: {{user.account}}<br>
-Your balance is: {{user.balance}}<br>
-Your address is: {{user.address}}<br>
+<div id="account-body-box">
+    <div class="account-widget">
+        Your account number is: {{user.account}}<br>
+        Your address is: {{user.address}}<br>
+    </div>
+    <div class="account-widget" id="display-balance">
+        Your balance is: <h1>{{user.balance}}</h1><br>
+    </div>
+    <div class="account-widget" id="cc">
+        <img id="cc-image" src="/img/purple-cc.png">
+       
+    </div>
+    <div class="account-widget" id="cc">
+         <h2>Find the perfect card.
+            No blackout dates.
+            No fees.
+            No limits.
+        </h2>
+    </div>
+</div>

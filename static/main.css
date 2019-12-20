@@ -15,8 +15,16 @@ h1 {
     color: rgb(168, 16, 210);
 }
 
+h2 {
+    color: rgb(168, 168, 168);
+
+}
+
 h3 {
+    display: block;
     color: rgb(122, 20, 114);
+    margin-block-start: 0px;
+    margin-block-end: 0px;
 }
 
 
@@ -25,7 +33,7 @@ div {display: flex;}
 
 form {
     display: flex;
-
+    justify-content: center;
 }
 
 form input {
@@ -38,6 +46,7 @@ form input {
     font-weight: 600;
     font-size: small;
     text-align: left;
+    padding-inline-start: 5px;
     
 }
 
@@ -61,7 +70,7 @@ form input {
     left: 0px;
     width: 100%;
     height: 100px;
-    background-color: rgb(60, 126, 249);
+    background-image: linear-gradient(rgb(60,126,249), rgba(60, 126, 249, 90%));
     display: flex;
     flex-direction: row;
     justify-content: center;
@@ -107,12 +116,20 @@ form input {
 
 #account-container {
     flex-direction: column;
-    width: 600px;
+    width: 700px;
     background-color: rgb(255, 255, 255);
     border-radius: 40px 0px;
     padding: 40px;
     color: rgb(83, 83, 83);
     margin: 20px;
+    
+}
+
+#account-body-box {
+    flex-direction: row;
+    flex-wrap: wrap;
+    width: 100%;
+    
 }
 
 #account-toolbar {
@@ -126,26 +143,56 @@ form input {
     background-color: white;
 }
 
-.account-widget {
+.toolbar-widget {
     flex-direction: column;
 }
-.account-widget ul {
+.toolbar-widget ul {
     list-style-type: none;
     color: rgb(83, 83, 83);
     padding: 0px;
 }
 
-.account-widget ul li a {
+.toolbar-widget ul li a {
     color: rgb(83, 83, 83);
     background-color: white;
     text-decoration: none;
     margin: 5px;
 }
 
-.account-widget ul li a:hover {
+.toolbar-widget ul li a:hover {
     filter: invert(20%);
     border-radius: 5px;
 }
+
+.account-widget {
+    width: 50%;
+    min-height: 200px;
+    padding: 5px;
+    box-sizing: inherit;
+    
+}
+
+.account-widget img {
+    position: absolute;
+    width: 300px;
+    z-index: 1;
+}
+
+.account-widget h2 {
+    z-index: 2;
+}
+
+.account-widget#cc {
+    background-color: rgb(230, 230, 230);
+}
+
+
+
+#display-balance {
+    flex-direction: column;
+    align-items: center;
+}
+
 
 #account-welcome-p {
     color:rgb(175, 0, 175);

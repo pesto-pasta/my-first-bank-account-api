@@ -4,7 +4,10 @@ const session = require('express-session');
 const handleBars = require('express-handlebars');
 const Handlebars = require('handlebars');
 const DBQuery = require('./DBQuery.js');
+const currency = require('currency.js');
 const app = express();
+
+
 
 //listen on 3000
 app.listen(3000, () => console.log("Listening on port 3000..."));
@@ -221,13 +224,18 @@ app.get('/account/:page', authorize, (req, res) => {
     let message = undefined;
     if (req.query.message === "passchanged") {
         message = "Your password was successfully changed"
+    } else if (req.query.message === "credentials") {
+        message = "There was an error with credentials you entered"
     }
+
+    req.session.user.balance = currency(req.session.user.balance, {formatWithSymbol: true}).format();
 
 
     res.render("account.handlebars", {
         user: req.session.user,
         accountLinks: passAccountLinkText(req.session.user),
         message: message,
+        
     });
 })
 
@@ -264,6 +272,6 @@ app.post('/changepass', authorize, (req, res) => {
         })
         .catch((reject) => {
             console.log(reject, "somthing went wrong... ");
-            res.redirect('/account/home');
+            res.redirect('/account/changepass?message=credentials');
         })
 })

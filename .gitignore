@@ -1,4 +1,5 @@
 /node_modules
 /.vscode
 testingbed.js
+*/.DS_Store
 /.DS_Store
