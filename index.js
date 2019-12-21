@@ -9,8 +9,8 @@ const app = express();
 
 
 
-//listen on 3000
-app.listen(3000, () => console.log("Listening on port 3000..."));
+//listen on 3001
+app.listen(3001, () => console.log("Listening on port 3001..."));
 
 //define customHandlebars
 const customHandlebars = handleBars.create({
