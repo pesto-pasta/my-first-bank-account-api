@@ -14,7 +14,11 @@ connection.query('USE store', (error, results, fields) => {
 });
 
 function searchForUser(first, last) {
+
+//instantly returns a promise, but resolves in async. Returns either resolve or reject method depending on the insides..vv
     return new Promise((resolve, reject) => {
+
+        //queries take callbacks! When it resolves, it calls the calls the callback and passes in the resolution arguments ..vv
         connection.query('SELECT * FROM user WHERE first = ? AND last = ?', [first, last], function (error, results, fields) {
             if (error) {
                 console.log("error finding user with first and last in database.");
@@ -92,9 +96,9 @@ function checkPass(account, password) {
     })
 }
 
-function changePass(account, newPass) {
+function updateUser(item, account, value) {
     return new Promise((resolve, reject) => {
-        connection.query('UPDATE user SET password = ? WHERE account = ?', [newPass, account], (error, results) => {
+        connection.query('UPDATE user SET ' + item + ' = ? WHERE account = ?', [value, account], (error, results) => {
             if (error) console.log(error);
             else resolve(results);
         })
@@ -102,9 +106,10 @@ function changePass(account, newPass) {
 }
 
 
+
+
 exports.searchForUser = searchForUser;
 exports.newUser = newUser;
 exports.getUser = getUser;
 exports.checkPass = checkPass;
-exports.changePass  = changePass;
-
+exports.updateUser  = updateUser;

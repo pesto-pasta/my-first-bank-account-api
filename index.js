@@ -41,14 +41,33 @@ app.use(express.urlencoded({ extended: true }));
 app.use(session({ secret: "87654dddkl", resave: true, saveUninitialized: true }));
 
 
+//globals
+const pendingData = {};
+
 //anonymous functions area
-function registerPartial(name) {
+function refreshSessionData(user) {
+    return new Promise((resolve, reject) => {
+        DBQuery.getUser(user.last, user.password)
+            .then((result) => {
+                console.log();
+                user = result[0];
+                resolve(user);
+            })
+            .catch((error) => {
+                console.log(error);
+                reject(error);
+            })
+    })
+
+}
+
+function registerPartial(partialType, name) {
     let file = __dirname + "/views/subviews/" + name + ".handlebars";
     fs.readFile(file, 'utf-8', (error, result) => {
         if (error) {
             console.log(error);
         } else {
-            Handlebars.registerPartial('sub_page', result);
+            Handlebars.registerPartial(partialType, result);
         }
     })
 }
@@ -80,11 +99,15 @@ function passAccountLinkText(user) {
 
 //ROUTES
 app.get('/', (req, res) => {
-
-    let logoutMessage = req.query.logout ? "Come again soon." : undefined;
+    let message = "";
+    if (req.query.logout) {
+        message = "Come again soon";
+    } else if (req.query.error === "serverrlogout") {
+        message = "An error has occurred and you have been securely logged out. Please try again later"
+    }
     res.render("index.handlebars", {
         accountLinks: passAccountLinkText(req.session.user),
-        message: logoutMessage,
+        message: message,
     });
 });
 
@@ -170,9 +193,9 @@ app.post('/open_account', (req, res) => {
             console.log(result, "User written to database...");
             req.session.user = result;
         })
-        //do some shit with results
+        
         .catch((reject) => {
-            console.log("Error at index 158.", reject);
+            console.log(reject);
         })
 
 
@@ -219,24 +242,40 @@ app.post('/login', (req, res) => {
 })
 
 app.get('/account/:page', authorize, (req, res) => {
-    registerPartial(req.params.page);
+    refreshSessionData(req.session.user)
+        .then((result) => {
+            req.session.user = result;
+            registerPartial("sub_page", req.params.page);
+            req.session.user.balance = currency(req.session.user.balance, { formatWithSymbol: true }).format();
+            
+
+
+            res.render("account.handlebars", {
+                user: req.session.user,
+                accountLinks: passAccountLinkText(req.session.user),
+                message: message,
+                pendingBalance: pendingData.balance
+
+            });
+        })
+        .catch((error) => {
+            console.log(error);
+            delete req.session.user;
+            res.redirect('/?error=serverrlogout');
+        })
 
     let message = undefined;
     if (req.query.message === "passchanged") {
         message = "Your password was successfully changed"
     } else if (req.query.message === "credentials") {
         message = "There was an error with credentials you entered"
+    } else if (req.query.message === "balance") {
+        message = "Your balance was successfully changed"
+    } else if (req.query.message === "procerror") {
+        message = "There was an error processing your request"
     }
 
-    req.session.user.balance = currency(req.session.user.balance, {formatWithSymbol: true}).format();
 
-
-    res.render("account.handlebars", {
-        user: req.session.user,
-        accountLinks: passAccountLinkText(req.session.user),
-        message: message,
-        
-    });
 })
 
 app.get('/logout', (req, res) => {
@@ -245,7 +284,7 @@ app.get('/logout', (req, res) => {
 })
 
 app.post('/changepass', authorize, (req, res) => {
-        //check that the new passwords match fail? redirect to account/changepass?error="dontmatch"
+    //check that the new passwords match fail? redirect to account/changepass?error="dontmatch"
 
     //check database that password matches existing password fail? redirect to account/changepass?error="invalidpass"
     //write the new password to the database
@@ -257,7 +296,7 @@ app.post('/changepass', authorize, (req, res) => {
         //then write the new pass to the db
         .then((result) => {
             console.log("Found a user..")
-            return DBQuery.changePass(req.session.user.account, req.body.newPass);
+            return DBQuery.updateUser('password', req.session.user.account, req.body.newPass);
         })
 
         .then((result) => {
@@ -267,11 +306,36 @@ app.post('/changepass', authorize, (req, res) => {
 
         .then((result) => {
             console.log("Password was successfully changed.");
-            req.session.user.password = result.password;
+            req.session.user.password = result[0].password;
             res.redirect('/account/home?message=passchanged')
         })
         .catch((reject) => {
             console.log(reject, "somthing went wrong... ");
             res.redirect('/account/changepass?message=credentials');
         })
+})
+
+app.post('/changebal', authorize, (req, res) => {
+    if (!req.query.confirm) {
+        pendingData.balance = req.body.newBalance; //set pending balance to the user.
+        console.log();
+        registerPartial('popup', 'confirmbalance');
+        res.redirect('/account/changebalance');
+    } else {
+
+        //req.query.confirm must exist..
+        delete req.query.confirm;
+        //query database and set balance = req.session.user.pendingBalance
+        DBQuery.updateUser('balance', req.session.user.account, pendingData.balance)
+            .then((result) => {
+                console.log('balance successfully changed for' + req.session.user.account, req.session.user.first);
+                delete pendingData.balance;
+                res.redirect('/account/home?message=balance');
+            })
+            .catch((error) => {
+                console.log('There was an error updating the balance. Check DB logs.')
+                res.redirect('/account/home?message=procerror');
+            })
+    }
+
 })
