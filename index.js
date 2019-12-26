@@ -147,7 +147,7 @@ app.post('/deposit/:account/:amount', (req, res) => {
 
 app.post('/withdrawl/:account/:amount', (req, res) => {
     let withdrawl = req.params.amount * -1;
-    res.redirect('/deposit/' + req.params.account + '/' + withdrawl);
+    res.redirect(307, '/deposit/' + req.params.account + '/' + withdrawl);
 });
 
 app.get('/open_account', (req, res) => {
