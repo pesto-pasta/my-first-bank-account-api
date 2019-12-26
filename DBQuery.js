@@ -105,6 +105,18 @@ function updateUser(item, account, value) {
     })
 }
 
+function getBalance(account) {
+    return new Promise((resolve, reject) => {
+        connection.query('SELECT * from user WHERE account = ?', [account], (error, results) => {
+            if (error) console.log(error);
+            else {
+                results = results[0].balance;
+                resolve(results);
+            }
+            
+        })
+    })
+}
 
 
 
@@ -112,4 +124,5 @@ exports.searchForUser = searchForUser;
 exports.newUser = newUser;
 exports.getUser = getUser;
 exports.checkPass = checkPass;
-exports.updateUser  = updateUser;
+exports.updateUser = updateUser;
+exports.getBalance = getBalance;

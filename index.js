@@ -44,6 +44,7 @@ app.use(session({ secret: "87654dddkl", resave: true, saveUninitialized: true })
 //globals
 const pendingData = {};
 
+
 //anonymous functions area
 function refreshSessionData(user) {
     return new Promise((resolve, reject) => {
@@ -111,39 +112,42 @@ app.get('/', (req, res) => {
     });
 });
 
-app.get('/userInfo', (req, res) => {
-    res.send(users);
-})
+app.get('/userInfo/:last/:pass', (req, res) => {
+    DBQuery.getUser(req.params.last, req.params.pass)
+        .then((result) => {
+            res.send(JSON.stringify(result[0]));
+        })
+        .catch((error) => {
+            res.status(404);
+            res.send("The user with the given credentials was not found...");
+        })
+                
+    });
 
-app.get('/userInfo/:user', (req, res) => {
-    const user = users.find((user) => user.firstName === req.params.user);
-    if (!user) {
-        res.status(404);
-        res.send("The user with the given name was not found...");
-    }
-    res.send(user);
+app.post('/deposit/:account/:amount', (req, res) => {
+    let oldBalance;
+    DBQuery.getBalance(req.params.account)
+        .then((result) => {
+            oldBalance = result;
+            result += parseInt(req.params.amount);
+            return DBQuery.updateUser('balance', req.params.account, result);
+        })
+        .then((result) => {
+            console.log("The balance change request has been made");
+            return DBQuery.getBalance(req.params.account);  //eventually returns balance as a number.
+        })
+        .then((result) => {
+            console.log("The balance change has been posted to your account");
+            res.send("The new balance was posted to your account. \n Old balance:" + oldBalance + ".\n New balance: " + result + ".");
+        })        
+        .catch((error) => {
+            res.send("There was an error posting the new balance to your account.");
+        })
 });
 
-app.post('/deposit/:first/:last/:amount', (req, res) => {
-    const user = users.find((user) => user.firstName === req.params.first);
-    if (!user) {
-        res.status(404);
-        res.send("The user with the given name was not found...");
-        return;
-    }
-    user.cash += parseInt(req.params.amount);
-    res.send("The amount you requested, " + req.params.amount + " has been posted to " + user.firstName + "'s account. \n The new account balance is $" + user.cash + ".");
-
-});
-
-app.get('/balance/:first', (req, res) => {
-    const user = users.find((user) => user.firstName === req.params.first);
-    if (!user) {
-        res.status(404);
-        res.send("The user with the given name was not found...");
-        return;
-    }
-    res.send(user.firstName + "'s balance is $" + user.cash);
+app.post('/withdrawl/:account/:amount', (req, res) => {
+    let withdrawl = req.params.amount * -1;
+    res.redirect('/deposit/' + req.params.account + '/' + withdrawl);
 });
 
 app.get('/open_account', (req, res) => {
